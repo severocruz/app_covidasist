@@ -1,5 +1,6 @@
 import 'package:app_covidasist/src/bloc/provider.dart';
 import 'package:app_covidasist/src/providers/usuario_provider.dart';
+import 'package:app_covidasist/src/utils/utils.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatelessWidget {
@@ -76,7 +77,7 @@ class LoginPage extends StatelessWidget {
             keyboardType: TextInputType.emailAddress,
             decoration: InputDecoration(
               icon: Icon(Icons.alternate_email,color: Colors.deepPurple,),
-              hintText: 'ejemplo@correo.com',
+              hintText: 'user',
               labelText: 'Nombre de Usuario',
               counterText: snapshot.data,
               errorText: snapshot.error
@@ -125,17 +126,25 @@ class LoginPage extends StatelessWidget {
               elevation: 0.0,
               color: Color.fromRGBO(0, 154, 221, 1.0) ,
               textColor: Colors.white,
-            onPressed: snapshot.hasData ? () => _login(bloc, context) : null,
+           // onPressed: snapshot.hasData ? () => _login(bloc, context) : null,
+           onPressed: (){
+             _login(bloc, context);
+           },
         );
 
       },
     );
   }
 
-  _login(LoginBloc bloc, BuildContext context){
+  _login(LoginBloc bloc, BuildContext context) async{
     
-    usuarioProvider.login('faruni', bloc.password);
-    // Navigator.pushReplacementNamed(context, 'home');
+    Map info = await usuarioProvider.login(bloc.email, bloc.password);
+    if(info['ok']){
+      Navigator.pushReplacementNamed(context, 'home');
+    }else{
+      mostrarAlerta(context,info['message']);
+    }
+    
   }
 
   Widget _crearFondo(BuildContext context){
