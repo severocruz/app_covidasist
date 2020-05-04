@@ -1,7 +1,10 @@
+import 'package:app_covidasist/src/bloc/provider.dart';
+import 'package:app_covidasist/src/providers/usuario_provider.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatelessWidget {
 
+  final usuarioProvider = new UsuarioProvider();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -15,6 +18,9 @@ class LoginPage extends StatelessWidget {
   }
 
   Widget _loginForm( BuildContext context ){
+    final bloc = Provider.of(context);
+
+
     final size = MediaQuery.of(context).size;
     return SingleChildScrollView(
       child: Column(
@@ -25,8 +31,8 @@ class LoginPage extends StatelessWidget {
             )
           ),
           Container(
-            width: size.width * 0.8,
-            margin: EdgeInsets.symmetric(vertical:30.0),
+            width: size.width * 0.9,
+            margin: EdgeInsets.symmetric(vertical:20.0),
             padding: EdgeInsets.symmetric(vertical: 50.0),
             //height: size.height * 0.3,
             decoration: BoxDecoration(
@@ -44,12 +50,12 @@ class LoginPage extends StatelessWidget {
             child: Column(
               children: <Widget>[
                 Text('Ingreso', style: TextStyle(fontSize: 20.0),),
-                SizedBox(height:60.0),
-                _crearEmail(),
-                SizedBox(height:30.0),
-                _crearPassword(),
-                SizedBox(height:30.0),
-                _crearBoton()
+                SizedBox(height:20.0),
+                _crearEmail(bloc),
+                SizedBox(height:20.0),
+                _crearPassword(bloc),
+                SizedBox(height:20.0),
+                _crearBoton(bloc)
               ]
             ),
           ),
@@ -60,48 +66,78 @@ class LoginPage extends StatelessWidget {
       ),
     );
   }
-  Widget _crearEmail(){
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal:20.0),
-      child: TextField(
-        keyboardType: TextInputType.emailAddress,
-        decoration: InputDecoration(
-          icon: Icon(Icons.alternate_email,color: Colors.deepPurple,),
-          hintText: 'lmorales',
-          labelText: 'Nombre de Usuario'
-        ),
-      ),
-    );
-  }
-   Widget _crearPassword(){
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal:20.0),
-      child: TextField(
-
-        obscureText: true,
-        decoration: InputDecoration(
-          icon: Icon(Icons.lock_outline ,color: Colors.deepPurple,),
-          labelText: 'Contraseña'
-        ),
-      ),
-    );
-  }
-  Widget _crearBoton(){
-    return RaisedButton(
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 80.0,vertical:15.0),
-        child: Text('Ingresar'),
-        ),
-        shape:RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(5.0) 
+  Widget _crearEmail(LoginBloc bloc){
+    return StreamBuilder(
+      stream: bloc.emailStream ,
+      builder: (BuildContext context, AsyncSnapshot snapshot){
+        return Container(
+          padding: EdgeInsets.symmetric(horizontal:20.0),
+          child: TextField(
+            keyboardType: TextInputType.emailAddress,
+            decoration: InputDecoration(
+              icon: Icon(Icons.alternate_email,color: Colors.deepPurple,),
+              hintText: 'ejemplo@correo.com',
+              labelText: 'Nombre de Usuario',
+              counterText: snapshot.data,
+              errorText: snapshot.error
+            ),
+            onChanged: ( value ) => bloc.changeEmail(value),
           ),
-          elevation: 0.0,
-          color: Color.fromRGBO(0, 154, 221, 1.0) ,
-          textColor: Colors.white,
-          
-        onPressed: (){},
+        );  
+      },
     );
   }
+
+  Widget _crearPassword(LoginBloc bloc){
+    return StreamBuilder(
+      stream: bloc.passwordStream,
+      builder: (BuildContext context, AsyncSnapshot snapshot){
+        return Container(
+          padding: EdgeInsets.symmetric(horizontal:20.0),
+          child: TextField(
+            obscureText: true,
+            decoration: InputDecoration(
+              icon: Icon(Icons.lock_outline ,color: Colors.deepPurple,),
+              labelText: 'Contraseña',
+              counterText: snapshot.data,
+              errorText: snapshot.error,
+            ),
+            onChanged: bloc.changePassword,
+          ),
+        );
+      },
+    );
+  }
+  Widget _crearBoton(LoginBloc bloc){
+    // formValidStream
+    return StreamBuilder(
+      stream: bloc.formValidStream,
+      builder: (BuildContext context, AsyncSnapshot snapshot){
+        
+        return RaisedButton(
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 80.0,vertical:15.0),
+            child: Text('Ingresar'),
+            ),
+            shape:RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(5.0) 
+              ),
+              elevation: 0.0,
+              color: Color.fromRGBO(0, 154, 221, 1.0) ,
+              textColor: Colors.white,
+            onPressed: snapshot.hasData ? () => _login(bloc, context) : null,
+        );
+
+      },
+    );
+  }
+
+  _login(LoginBloc bloc, BuildContext context){
+    
+    usuarioProvider.login('faruni', bloc.password);
+    // Navigator.pushReplacementNamed(context, 'home');
+  }
+
   Widget _crearFondo(BuildContext context){
     final size = MediaQuery.of(context).size;
     final fondoAzul =  Container(
