@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'CovidAsist',
-        initialRoute: 'login',
+        initialRoute: 'home',
         routes: {
           'login': ( BuildContext context ) => LoginPage(),
           'home':  ( BuildContext context ) => HomePage(),
