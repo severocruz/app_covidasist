@@ -4,13 +4,13 @@ import 'package:app_covidasist/src/preferencias/preferencias_usuario.dart';
 import 'package:http/http.dart' as http;
 
 class UsuarioProvider {
-
+  
   final String _token = '';
   final _prefs = new PreferenciasUsuario();
 
   Future<Map<String, dynamic>> login (String email, String password) async {
       // {"userid":"faruni","password":"Inbolsa1"}
-       // http://intranet.lafar.net/newApiLafarnet/public/usuario/login
+      // http://intranet.lafar.net/newApiLafarnet/public/usuario/login
     final authData = {
       'userid'    : email.trim(),
       'password'  : password
@@ -33,9 +33,5 @@ class UsuarioProvider {
     } else {
       return { 'ok': false, 'message': 'Las credenciales son incorrectas'};
     }
-
-    
-    
-
   }
 }
