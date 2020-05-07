@@ -12,7 +12,7 @@ class DateProvider {
     final response = await http.get(_url);
     Map<String, dynamic> decodedResp = json.decode(response.body);
     
-    print(decodedResp);
-    return decodedResp;
+    // print(decodedResp);
+    return { 'fecha': decodedResp['datetime'] };
   }
 }

@@ -23,7 +23,7 @@ class UsuarioProvider {
 
     Map<String, dynamic> decodedResp = json.decode( resp.body );
 
-    print("la respuesta de la peticion ${email.trim()}-$password  ---> ${decodedResp['status']}");
+    // print("la respuesta de la peticion ${email.trim()}-$password  ---> ${decodedResp['status']}");
     
     if (decodedResp['status'] == 202) {
       _prefs.username = decodedResp['body'][0]['username'].toString();

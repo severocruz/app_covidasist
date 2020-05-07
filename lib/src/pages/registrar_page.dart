@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
+
 import 'package:app_covidasist/src/providers/date_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:latlong/latlong.dart';
 
 class RegistrarPage extends StatefulWidget {
@@ -17,42 +19,48 @@ class _RegistrarPageState extends State<RegistrarPage> {
   String tipoMapa = 'streets';
 
   double size;
-
+  String _fechaActual = '';
+  String _horaActual = '';
   final dateProvider = new DateProvider();
   @override
   Widget build(BuildContext context) {
     this.size = MediaQuery.of(context).size.height;
-    
-    new Timer.periodic(new Duration(seconds: 20), this._obtenerFechaActual());
-    return Column(
-      
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-       Container(
-         height: this.size * 0.5,
-         child: Column(
-          children: <Widget>[
-            _capturaDatos(context),
-            Divider(),  
-            _creatReloj(),
-            Divider(),
-            _crearBotones(context)
-           ],
+
+    this._obtenerFechaActual();    
+    // new Timer.periodic(new Duration(seconds: 20), this._obtenerFechaActual());
+    new Timer.periodic(Duration(seconds: 60), (Timer t) => _obtenerFechaActual());
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+         Container(
+           height: this.size * 0.5,
+           child: Column(
+            children: <Widget>[
+              _capturaDatos(context),
+              Divider(),  
+              _creatReloj(),
+              Divider(),
+              _crearBotones(context)
+             ],
+           ),
          ),
-       ),
-        _crearFlutterMap(),
-      ],
+          _crearFlutterMap(),
+        ],
+      ),
     );
   }
 
   Widget _creatReloj() {
     return Column(
      children: <Widget>[
-       Text('19:50:02', 
-            style: TextStyle(fontSize: 50.0,fontWeight: FontWeight.bold ),
+       Text(
+        _horaActual, // != null ? 'No existe la hora' : _fechaActual, 
+        style: TextStyle(fontSize: 50.0,fontWeight: FontWeight.bold ),
        ),
        Container(width:double.infinity),
-       Text('20/03/2020',
+       Text(
+         _fechaActual,
             style: TextStyle(fontSize: 15.0,fontWeight: FontWeight.w300 ),
        )
     ],
@@ -105,9 +113,17 @@ class _RegistrarPageState extends State<RegistrarPage> {
     );
   }
 
-  _obtenerFechaActual(){
+  _obtenerFechaActual() async{
+    Map info = await this.dateProvider.obtenerFechaYHoraActual(); 
     setState(() {
-      this.dateProvider.obtenerFechaYHoraActual();
+      var datofecha = info['fecha'].toString();
+      var fechaActual = DateTime.parse(datofecha.substring(0, datofecha.length - 6));
+
+      var formatoFecha = new DateFormat('dd-MMM-yyyy');
+      var formatoHora = new DateFormat.Hms();
+      _fechaActual = formatoFecha.format(fechaActual);
+      _horaActual = formatoHora.format(fechaActual);
+      // print(fechaActual);
     });
   }
     
