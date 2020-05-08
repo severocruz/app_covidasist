@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
-
+import 'package:app_covidasist/src/bloc/marcacion_bloc.dart';
+import 'package:app_covidasist/src/models/marcacion_model.dart';
 import 'package:app_covidasist/src/providers/date_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong/latlong.dart';
@@ -15,17 +17,21 @@ class RegistrarPage extends StatefulWidget {
 }
 
 class _RegistrarPageState extends State<RegistrarPage> {
+  final marcacionBloc = new MarcacionBloc();
   File foto;
   String tipoMapa = 'streets';
 
   double size;
   String _fechaActual = '';
   String _horaActual = '';
+
+  LatLng _ubicacionActual;
   final dateProvider = new DateProvider();
   @override
   Widget build(BuildContext context) {
     this.size = MediaQuery.of(context).size.height;
 
+    this._obtenerUbicacionActual();
     this._obtenerFechaActual();    
     // new Timer.periodic(new Duration(seconds: 20), this._obtenerFechaActual());
     new Timer.periodic(Duration(seconds: 60), (Timer t) => _obtenerFechaActual());
@@ -80,7 +86,7 @@ class _RegistrarPageState extends State<RegistrarPage> {
             textColor: Colors.white,
             ),
           RaisedButton(
-            onPressed: (){}, 
+            onPressed: () => _registrarSalida(), 
             child: Text('Registrar Salida'),
             color: Colors.redAccent,
             textColor: Colors.white
@@ -127,7 +133,10 @@ class _RegistrarPageState extends State<RegistrarPage> {
     });
   }
     
-
+  _obtenerUbicacionActual() async {
+    Position position = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    _ubicacionActual = new LatLng(position.latitude, position.longitude);
+  }
   _mostrarFoto() {
     if (foto != null) {
       return FileImage(foto);
@@ -141,10 +150,12 @@ class _RegistrarPageState extends State<RegistrarPage> {
     
     if(foto != null){
       // limpieza
+      
     }
 
     setState(() {
       foto = image;
+
     });
   }
 
@@ -154,11 +165,13 @@ class _RegistrarPageState extends State<RegistrarPage> {
       height: this.size*0.25,
       child: FlutterMap(
         options: MapOptions(
-          center: LatLng(-16.5454941,-68.2310343),
-          zoom: 15
+          center: _ubicacionActual != null ? _ubicacionActual: LatLng(-16.5454941,-68.2310343),
+          zoom: 14
         ),
         layers: [
-          _crearMapa(),          
+          _crearMapa(),
+          this._ubicacionActual != null 
+            ? _crearMarcadores(this._ubicacionActual) : new MarkerLayerOptions()
         ],
       ),
     );
@@ -174,5 +187,53 @@ class _RegistrarPageState extends State<RegistrarPage> {
         //streets, dark, light, outdoors, satellite
       }
     );
+  }
+
+  _crearMarcadores( LatLng ubicacion ){
+    return MarkerLayerOptions(
+      markers: <Marker>[
+        Marker(
+          width: 100.0,
+          height: 100.0,
+          point: ubicacion,
+          builder: ( context ) => Container(
+            child: 
+              Icon(
+                Icons.location_on,
+                size: 70.0,
+                color: Theme.of(context).primaryColor,
+              ),
+          )
+        )
+      ]
+    );
+  }
+
+  _registrarEntrada(){
+      final Marcacion marcacion = new Marcacion();
+      marcacion.id = 0;
+      marcacion.username = 'faruni';
+      marcacion.nombreEmpleado = 'Franz Ronald Aruni Mollo';
+      marcacion.fechaMarcacion = DateTime.now();
+      marcacion.latitud = 1.44323432;
+      marcacion.longitud = 1.34234443;
+      marcacion.imagen = 'faruni.png';
+      marcacion.estadoSync = false;
+
+      marcacionBloc.agregarMarcacion(marcacion);
+  }
+
+  _registrarSalida(){
+      final Marcacion marcacion = new Marcacion();
+      marcacion.id = 0;
+      marcacion.username = 'faruni';
+      marcacion.nombreEmpleado = 'Franz Ronald Aruni Mollo';
+      marcacion.fechaMarcacion = DateTime.now();
+      marcacion.latitud = 1.44323432;
+      marcacion.longitud = 1.34234443;
+      marcacion.imagen = 'faruni.png';
+      marcacion.estadoSync = false;
+
+      marcacionBloc.agregarMarcacion(marcacion);
   }
 }
